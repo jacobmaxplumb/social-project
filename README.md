@@ -17,3 +17,11 @@
 
 # Complete Setup
 - create docker-compose file to include all projects and mount volume for db
+
+# Kubernetes Setup
+- build and deploy docker images
+- create an ingress service to point to the apis endpoint
+- create a deployment and service for the api
+- create a deployment and service for the database
+- create a deployment and service for redis
+- create a deployment and nodeport service for the front end

@@ -9,7 +9,7 @@ services:
       - backend
     
   backend:
-    image: jacobmaxplumb/project-backend
+    image: jacobmaxplumb/project-backend2
     ports:
       - 8080:8080
     depends_on:
@@ -24,6 +24,6 @@ services:
   redis:
     image: redis
     ports:
-     - 7001:6379
+     - 6379:6379
     
     

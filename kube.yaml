@@ -1,0 +1,225 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: social-project
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api
+        backend:
+          serviceName: social-project-api
+          servicePort: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-project-db
+spec:
+  selector:
+    matchLabels:
+      type: db
+      service: social-project
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        type: db
+        service: social-project
+    spec:
+      containers:
+      - name: db
+        image: mongo
+        ports:
+          - containerPort: 27017
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-project-db
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    type: db
+    service: social-project
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-project-api
+spec:
+  selector:
+    matchLabels:
+      type: api
+      service: social-project
+  template:
+    metadata:
+      labels:
+        type: api
+        service: social-project
+    spec:
+      containers:
+      - name: api
+        image: jacobmaxplumb/project-backend2
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-project-redis
+spec:
+  selector:
+    matchLabels:
+      type: redis
+      service: social-project
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        type: redis
+        service: social-project
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        ports:
+          - containerPort: 6379
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-project-redis
+spec:
+  ports:
+  - port: 6379
+  selector:
+    type: redis
+    service: social-project
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-project-api
+spec:
+  ports:
+  - port: 8080
+  selector:
+    type: api
+    service: social-project
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  #the Deployment Name
+  name: social-project-frontend
+spec:
+  #the Number of Pods
+  replicas: 2
+  selector:
+    matchLabels:
+      type: frontend
+      service: social-project
+  template:
+    metadata:
+      labels:
+        type: frontend
+        service: social-project
+    spec:
+      # Container Details
+      containers:
+      - name: frontend
+        # Docker Image
+        image: jacobmaxplumb/f-project
+        resources:
+         #cpu and memory limit
+          limits:
+            memory: "550Mi"
+            cpu: "500m"
+        ports:
+        #the port on which the app can be reached out inside the container
+        - containerPort: 80
+
+---
+
+#service 
+apiVersion: v1
+kind: Service
+metadata:
+   #the Serivce Name- it should match with the lable name of the deployment 
+  name: social-project-frontend
+spec:
+  #type of the service
+  type: NodePort
+  selector:
+    type: frontend
+    service: social-project
+  ports:
+  - port: 3050
+    targetPort: 80
+    protocol: TCP
+    nodePort: 31000
+
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: social-project-redis
+# spec:
+#   selector:
+#     matchLabels:
+#       type: redis
+#       service: social-project
+#   template:
+#     metadata:
+#       labels:
+#         type: redis
+#         service: social-project
+#     spec:
+#       containers:
+#       - name: api
+#         image: redis
+#         resources:
+#           limits:
+#             memory: "128Mi"
+#             cpu: "500m"
+
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: social-project-redis
+# spec:
+#   selector:
+#     type: redis
+#     service: social-project
+#   ports:
+#   - port: 6379
+
+
+
+
+
+
