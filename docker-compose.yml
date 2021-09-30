@@ -1,0 +1,29 @@
+version: '2.2'
+
+services:
+  frontend:
+    image: jacobmaxplumb/f-project
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    
+  backend:
+    image: jacobmaxplumb/project-backend
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+
+  database:
+    image: mongo
+    ports:
+      - 5454:27017
+    volumes: [/Users/jacobplumb/mongo:/data/db]
+
+  redis:
+    image: redis
+    ports:
+     - 7001:6379
+    
+    

@@ -4,6 +4,7 @@ const port = 8080;
 const cors = require('cors');
 const app = express();
 const mongo = require('./services/mongo');
+const redis = require('./services/redis');
 const { checkIfAuthenticated } = require('./services/token');
 
 app.use(cors());
@@ -14,7 +15,6 @@ app.get('/api/health', (req, res) => {
 });
 
 app.post('/api/seed', (req, res) => {
-    console.log('hit here')
     mongo.connect((err, result) => {
         result.db('social').collection('posts').insertOne({ content: 'Hello World' }).then(r => {
             res.sendStatus(201);
@@ -23,10 +23,17 @@ app.post('/api/seed', (req, res) => {
 });
 
 app.get('/api/posts', (req, res) => {
-    mongo.connect((err, result) => {
-        result.db('social').collection('posts').find({}).toArray().then(posts => {
-            res.send(posts);
-        }).finally(() => mongo.close());
+    redis.get('posts', (err, reply) => {
+        if (reply) {
+            res.send(JSON.parse(reply));
+        } else {
+            mongo.connect((err, result) => {
+                result.db('social').collection('posts').find({}).toArray().then(posts => {
+                    redis.setex('posts', 600, JSON.stringify(posts));
+                    res.send(posts);
+                }).finally(() => mongo.close());
+            })
+        }
     })
 })
 

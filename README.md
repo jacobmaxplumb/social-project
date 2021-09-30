@@ -8,6 +8,12 @@
 - add endpoints to server.js to test
 - create dockerfile, build, then deploy container from image
 
+- add redis service
+- add test point for redis
+
 # Frontend Setup
 - create react app with typescript template
-- make dockerfile
+- make dockerfile build and run container
+
+# Complete Setup
+- create docker-compose file to include all projects and mount volume for db
